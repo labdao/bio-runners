@@ -37,9 +37,15 @@ class Input(BaseModel):
 
 # GET example
 # curl -X GET http://localhost:4500/api/reverse-complement/ping
+# curl -X GET http://localhost:4500/api/reverse-complement/ping?bountyId=rec5T6CoaPeTPoLyH
+
 @app.get("/api/reverse-complement/ping")
-async def ping():
-    r = requests.get('http://localhost:4502/api/v0/bounties/latest?workflow=reverse-complement')
+async def ping(bountyId: str):
+    if bountyId:
+        r = requests.get('https://bio-board-yawnxyz.vercel.app/api/v0/bounties/'+bountyId, verify=False)
+    else:
+        # r = requests.get('http://localhost:4502/api/v0/bounties/latest?workflow=reverse-complement')
+        r = requests.get('https://bio-board-yawnxyz.vercel.app/api/v0/bounties/latest?workflow=reverse-complement', verify=False)
     bounty = r.json()
     print('[Ping!]', bounty)
     settings = json.loads(bounty['Input'])
@@ -49,15 +55,15 @@ async def ping():
     seq = Seq(sequence)
     revcomp = str(seq.reverse_complement())
 
-    print('[Ping!] ----> sequence:', sequence)
-    print('[Ping!] ----> rev-comp:', revcomp)
+    # print('[Ping!] ----> sequence:', sequence)
+    # print('[Ping!] ----> rev-comp:', revcomp)
 
     # post it as a submission
     output = { "Provider": 'reverse-complement-api', "Output": {"output":revcomp}, "Bounties": [bounty['Name']], "Notes": "Auto-submission by async endpoint" }
 
     headers = {"charset": "utf-8", "Content-Type": "application/json"}
-    url = 'http://localhost:4502/api/v0/submissions/create'
-    r = requests.post(url, json=output, headers=headers)
+    url = 'https://bio-board-yawnxyz.vercel.app/api/v0/submissions/create'
+    r = requests.post(url, json=output, headers=headers, verify=False)
 
     return {"msg": json.dumps(output)}
 

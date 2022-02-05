@@ -39,13 +39,13 @@ class Input(BaseModel):
 # curl -X GET http://localhost:4500/api/reverse-complement/ping
 # curl -X GET http://localhost:4500/api/reverse-complement/ping?bountyId=rec5T6CoaPeTPoLyH
 
-@app.get("/api/reverse-complement/ping")
+@app.get("/api/reverse-complement/ping-local")
 async def ping(bountyId: str):
     if bountyId:
-        r = requests.get('https://openlab-yawnxyz.vercel.app/api/v0/bounties/'+bountyId, verify=False)
+        r = requests.get('http://localhost:4502/api/v0/bounties/'+bountyId, verify=False)
     else:
         # r = requests.get('http://localhost:4502/api/v0/bounties/latest?workflow=reverse-complement')
-        r = requests.get('https://openlab-yawnxyz.vercel.app/api/v0/bounties/latest?workflow=reverse-complement', verify=False)
+        r = requests.get('http://localhost:4502/api/v0/bounties/latest?workflow=reverse-complement', verify=False)
     bounty = r.json()
     print('[Ping!]', bounty)
     settings = json.loads(bounty['Input'])
@@ -62,7 +62,7 @@ async def ping(bountyId: str):
     output = { "Provider": 'reverse-complement-api', "Output": {"output":revcomp}, "Bounties": [bounty['Name']], "Notes": "Auto-submission by async endpoint" }
 
     headers = {"charset": "utf-8", "Content-Type": "application/json"}
-    url = 'https://openlab-yawnxyz.vercel.app/api/v0/submissions/create'
+    url = 'http://localhost:4502/api/v0/submissions/create'
     r = requests.post(url, json=output, headers=headers, verify=False)
 
     return {"msg": json.dumps(output)}
